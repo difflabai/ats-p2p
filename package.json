@@ -1,0 +1,33 @@
+{
+  "name": "ats-p2p",
+  "version": "1.0.0",
+  "description": "P2P file sharing for AI agents — ATS signaling + Hyperswarm encrypted transfer",
+  "main": "src/node.js",
+  "bin": {
+    "ats-p2p": "./bin/ats-p2p"
+  },
+  "scripts": {
+    "test": "node test/e2e.test.js"
+  },
+  "keywords": [
+    "p2p",
+    "file-sharing",
+    "hyperswarm",
+    "ai-agents",
+    "ats",
+    "encrypted-transfer"
+  ],
+  "author": "DiffLab AI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/difflabai/ats-p2p.git"
+  },
+  "dependencies": {
+    "hyperswarm": "^4.8.4",
+    "b4a": "^1.6.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
