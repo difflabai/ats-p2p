@@ -39,17 +39,28 @@ class P2PNode extends EventEmitter {
   }
 
   /**
+   * Extract JSON from ATS CLI output (which appends trailing summary text).
+   */
+  _parseAtsOutput (raw) {
+    const trimmed = raw.trim()
+    // Try parsing as-is first
+    try { return JSON.parse(trimmed) } catch {}
+    // Extract JSON array [...] or object {...} from output
+    const arrMatch = trimmed.match(/^(\[[\s\S]*\])/m)
+    if (arrMatch) try { return JSON.parse(arrMatch[1]) } catch {}
+    const objMatch = trimmed.match(/^(\{[\s\S]*\})/m)
+    if (objMatch) try { return JSON.parse(objMatch[1]) } catch {}
+    return trimmed
+  }
+
+  /**
    * Execute an ATS CLI command and return parsed JSON output.
    */
   _ats (args) {
     const flags = `--url ${this.atsUrl} --actor-type agent --actor-id ${this.actorId} --actor-name "${this.actorName}" -f json`
     const cmd = `ats ${args} ${flags}`
     const result = execSync(cmd, { encoding: 'utf8', timeout: 15000 })
-    try {
-      return JSON.parse(result)
-    } catch {
-      return result.trim()
-    }
+    return this._parseAtsOutput(result)
   }
 
   /**
@@ -61,7 +72,7 @@ class P2PNode extends EventEmitter {
       const cmd = `ats ${args} ${flags}`
       exec(cmd, { encoding: 'utf8', timeout: 15000 }, (err, stdout) => {
         if (err) return reject(err)
-        try { resolve(JSON.parse(stdout)) } catch { resolve(stdout.trim()) }
+        resolve(this._parseAtsOutput(stdout))
       })
     })
   }
@@ -125,7 +136,7 @@ class P2PNode extends EventEmitter {
     this.emit('offer_sent', { transferId, taskId, fileName, recipientId })
 
     // Poll for acceptance (receiver claims the task)
-    const accepted = await this._waitForAccept(taskId)
+    const accepted = await this._waitForAccept(taskId, this.timeout)
     if (!accepted) {
       this.transfers.get(transferId).status = 'rejected'
       return { transferId, taskId, success: false, reason: 'Not accepted' }
@@ -160,7 +171,7 @@ class P2PNode extends EventEmitter {
   /**
    * Poll ATS for task to be claimed (accepted by receiver).
    */
-  async _waitForAccept (taskId, maxWait = 60000) {
+  async _waitForAccept (taskId, maxWait = 300000) {
     const start = Date.now()
     while (Date.now() - start < maxWait) {
       try {
