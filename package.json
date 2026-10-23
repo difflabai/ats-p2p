@@ -1,7 +1,7 @@
 {
   "name": "ats-p2p",
   "version": "1.0.0",
-  "description": "P2P file sharing for AI agents — ATS signaling + Hyperswarm encrypted transfer",
+  "description": "P2P file sharing for AI agents \u2014 ATS signaling + Hyperswarm encrypted transfer",
   "main": "src/node.js",
   "bin": {
     "ats-p2p": "./bin/ats-p2p"
@@ -28,6 +28,6 @@
     "b4a": "^1.6.7"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "^22.23.4 || ^24.22.1 || >=26.12.1"
   }
 }
